@@ -5,9 +5,9 @@
 
   <div ng-repeat="file in $$value$$">
     <div class="thumbnail-container">
-      <label>{{file.originalname}}</label>
+      <label><a href="api/files/download/{{file.filename}}/{{schema.id}}/{{file.path}}" download="{{file.originalname}}">{{file.originalname}}</a></label>
       <!-- api call to get file preview from server -->
-      <img ng-src="/api/files/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
+      <img ng-src="/api/files/preview/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
       <button class="btn btn-danger btn-xs" ng-click="deleteFile(file)">x</button>
     </div>
   </div>
@@ -39,8 +39,7 @@
         'modules.upload.field.preview' | translate }}</label>
       <img ngf-src="picFile" class="img-thumbnail img-responsive">
       <div class="img-placeholder"
-          ng-class="{'show': picFile.$invalid && !picFile.blobUrl, 'hide': !picFile || picFile.blobUrl}">No preview
-        available
+          ng-class="{'show': picFile.$invalid && !picFile.blobUrl, 'hide': !picFile || picFile.blobUrl}">Keine Vorschau verfügbar
       </div>
     </div>
     <div class="col-sm-4 mb-sm">
@@ -102,14 +101,14 @@
     ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
     ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
     ng-required="form.required"
-    accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
+    accept="*"
     ng-model-options="form.ngModelOptions" ngf-drag-over-class="dragover" class="drop-box dragAndDropDescription">
     <p class="text-center">{{ 'modules.upload.descriptionMultifile' | translate }}</p>
   </div>
   <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
 
   <button ngf-select="selectFiles(picFiles)" type="file" ngf-multiple="true" multiple ng-model="picFiles" name="files"
-    accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
+    accept="*"
     ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
     ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
     ng-required="form.required"
