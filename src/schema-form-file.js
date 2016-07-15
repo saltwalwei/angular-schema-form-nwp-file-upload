@@ -75,13 +75,14 @@ angular
       'ngFileUpload',
       'ngMessages'
    ])
-   .directive('ngSchemaFile', ['Upload', '$timeout', '$q', function (Upload, $timeout, $q) {
+   .directive('ngSchemaFile', ['Upload', 'CookieService', '$timeout', '$q', function (Upload, CookieService, $timeout, $q) {
       return {
         restrict: 'A',
         scope:    true,
         require:  'ngModel',
         link:     function (scope, element, attrs, ngModel) {
           scope.url = scope.form && scope.form.endpoint;
+          var token = CookieService.getToken();
           scope.isSinglefileUpload = scope.form && scope.form.schema && scope.form.schema.format === 'singlefile';
 
           scope.selectFile  = function (file) {
@@ -91,29 +92,56 @@ angular
             scope.picFiles = files;
           };
 
-          scope.uploadFile = function (file) {
-            file && doUpload(file);
+          scope.uploadFile = function (file, schemaId) {
+            file && doUpload(file, token, schemaId);
           };
 
-          scope.uploadFiles = function (files) {
+          scope.uploadFiles = function (files, schemaId) {
             files.length && angular.forEach(files, function (file) {
-              doUpload(file);
+              doUpload(file, token, schemaId);
             });
           };
 
-          function doUpload(file) {
+          function doUpload(file, token, schemaId) {
             if (file && !file.$error && scope.url) {
               file.upload = Upload.upload({
                 url:  scope.url,
-                file: file
+                file: file,
+                data: {
+                  schemaId: schemaId,
+                  path: scope.form.path
+                },
+                headers: {'X-Archibald-Token': token}
               });
 
               file.upload.then(function (response) {
                 $timeout(function () {
                   file.result = response.data;
                 });
-                ngModel.$setViewValue(response.data);
+                // first file on that property in record
+                if (!ngModel.$viewValue) {
+                  ngModel.$setViewValue([response.data]);
+                // property already has files
+                } else {
+                  var found = false;
+                  ngModel.$viewValue.forEach(function (file) {
+                    if (file.filename == response.data.filename) { found = true; }
+                  });
+                  if (!found) {
+                    ngModel.$viewValue.push(response.data);
+                  }
+                }
                 ngModel.$commitViewValue();
+                // empties fileinput for one file after being uploaded, timeout
+                // to wait for progressbar to change before removing file through
+                // animation from the filepicker
+                $timeout(function () {
+                  scope.picFiles.forEach(function (picFile) {
+                    if (file.blobUrl == picFile.blobUrl) {
+                      scope.picFiles.splice(scope.picFiles.indexOf(picFile),1);
+                    }
+                  });
+                });
               }, function (response) {
                 if (response.status > 0) {
                   scope.errorMsg = response.status + ': ' + response.data;
@@ -127,24 +155,18 @@ angular
             }
           }
 
-          scope.validateField = function () {
-            if (scope.uploadForm.file && scope.uploadForm.file.$valid && scope.picFile && !scope.picFile.$error) {
-              console.log('singlefile-form is invalid');
-            } else if (scope.uploadForm.files && scope.uploadForm.files.$valid && scope.picFiles && !scope.picFiles.$error) {
-              console.log('multifile-form is  invalid');
-            } else {
-              console.log('single- and multifile-form are valid');
-            }
-          };
-          scope.submit        = function () {
-            if (scope.uploadForm.file && scope.uploadForm.file.$valid && scope.picFile && !scope.picFile.$error) {
-              scope.uploadFile(scope.picFile);
-            } else if (scope.uploadForm.files && scope.uploadForm.files.$valid && scope.picFiles && !scope.picFiles.$error) {
-              scope.uploadFiles(scope.picFiles);
-            }
-          };
-          scope.$on('schemaFormValidate', scope.validateField);
-          scope.$on('schemaFormFileUploadSubmit', scope.submit);
+          // deletes a file from a record, the file and it's database entry are left
+          // since that scenario is assumed to be unlikely and better dealt with in
+          // future as of now
+          scope.deleteFile = function (filename) {
+            var files = [];
+            ngModel.$viewValue.forEach(function (file) {
+              if (file != filename) {
+                files.push(file);
+              }
+            });
+            ngModel.$setViewValue(files);
+          }
         }
       };
   }]);

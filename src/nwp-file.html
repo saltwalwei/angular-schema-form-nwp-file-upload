@@ -3,12 +3,22 @@
     {{ form.title }}<i ng-show="form.required">&nbsp;*</i>
   </label>
 
+  <div ng-repeat="file in $$value$$">
+    <div class="thumbnail-container">
+      <label>{{file.originalname}}</label>
+      <!-- api call to get file preview from server -->
+      <img ng-src="/api/files/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
+      <button class="btn btn-danger btn-xs" ng-click="deleteFile(file)">x</button>
+    </div>
+  </div>
+  <div class="clearfix"></div>
+
   <div ng-show="picFile">
     <div ng-include="'uploadProcess.html'" class="mb"></div>
   </div>
 
-  <ul ng-show="picFiles && picFiles.length" class="list-group">
-    <li class="list-group-item" ng-repeat="picFile in picFiles">
+  <ul ng-show="picFiles && picFiles.length" class="list-group process-files">
+    <li class="list-group-item process-file" ng-repeat="picFile in picFiles">
       <div ng-include="'uploadProcess.html'"></div>
     </li>
   </ul>
@@ -48,7 +58,7 @@
           {{ picFile.progress }} %
         </div>
       </div>
-      <button class="btn btn-primary btn-sm" type="button" ng-click="uploadFile(picFile)"
+      <button class="btn btn-primary btn-sm" type="button" ng-click="uploadFile(picFile, schema.id)"
               ng-disabled="!picFile || picFile.$error">{{ "buttons.upload" | translate }}
       </button>
     </div>
