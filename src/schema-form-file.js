@@ -19,11 +19,11 @@ angular
             schema.maxSize.validationMessage  = defaultMaxSizeMsg1;
             schema.maxSize.validationMessage2 = defaultMaxSizeMsg2;
           }
-          if (schema.minItems && schema.minItems.minimum && !schema.minItems.validationMessage) {
-            schema.minItems.validationMessage = defaultMinItemsMsg;
+          if (schema.minItems && !schema.minItemsValidationMessage) {
+            schema.minItemsValidationMessage = defaultMinItemsMsg;
           }
-          if (schema.maxItems && schema.maxItems.maximum && !schema.maxItems.validationMessage) {
-            schema.maxItems.validationMessage = defaultMaxItemsMsg;
+          if (schema.maxItems && !schema.maxItemsValidationMessage) {
+            schema.maxItemsValidationMessage = defaultMaxItemsMsg;
           }
 
           var f                                                  = schemaFormProvider.stdFormObj(name, schema, options);
@@ -45,11 +45,11 @@ angular
             schema.maxSize.validationMessage  = defaultMaxSizeMsg1;
             schema.maxSize.validationMessage2 = defaultMaxSizeMsg2;
           }
-          if (schema.minItems && schema.minItems.minimum && !schema.minItems.validationMessage) {
-            schema.minItems.validationMessage = defaultMinItemsMsg;
+          if (schema.minItems && !schema.minItemsValidationMessage) {
+            schema.minItemsValidationMessage = defaultMinItemsMsg;
           }
-          if (schema.maxItems && schema.maxItems.maximum && !schema.maxItems.validationMessage) {
-            schema.maxItems.validationMessage = defaultMaxItemsMsg;
+          if (schema.maxItems && !schema.maxItemsValidationMessage) {
+            schema.maxItemsValidationMessage = defaultMaxItemsMsg;
           }
 
           var f                                                  = schemaFormProvider.stdFormObj(name, schema, options);
@@ -69,6 +69,29 @@ angular
       );
     }
   ]);
+
+angular.module('schemaForm').directive(
+  'ngFileCountValidator', [
+    function() {
+      return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, element, attrs, ngModel) {
+          var valid = scope.form.schema.maxItems ? (scope.model.images ? scope.model.images.length : 0) < scope.form.schema.maxItems : true;
+          ngModel.$parsers.unshift(function(value) {
+            ngModel.$setValidity('ngFileCountValidator', valid);
+            return valid ? value : undefined;
+          });
+
+          ngModel.$formatters.unshift(function(value) {
+            ngModel.$setValidity('ngFileCountValidator', valid);
+            return valid ? value : undefined;
+          });
+        }
+      }
+    }
+  ]
+);
 
 angular
    .module('ngSchemaFormFile', [
@@ -103,6 +126,11 @@ angular
           };
 
           function doUpload(file, token, schemaId) {
+            if ((scope.model.images ? scope.model.images.length : 0) + 1 > scope.form.schema.maxItems) {
+              scope.uploadForm.$error.maxItems = true;
+              file.$error = "maxItems";
+              file.$errorParam = (scope.model.images ? scope.model.images.length : 0) + 1 + ". Datei, " + scope.form.schema.maxItems + " Dateien erlaubt.";
+            }
             if (file && !file.$error && scope.url) {
               file.upload = Upload.upload({
                 url:  scope.url,
@@ -140,6 +168,7 @@ angular
                     if (file.blobUrl == picFile.blobUrl) {
                       scope.picFiles.splice(scope.picFiles.indexOf(picFile),1);
                     }
+                    scope.uploadForm.$setDirty();
                   });
                 });
               }, function (response) {
@@ -166,6 +195,14 @@ angular
               }
             });
             ngModel.$setViewValue(files);
+            if (scope.picFiles) {
+              scope.picFiles.forEach(function (picFile) {
+                if (picFile.$error == "maxItems") {
+                  delete picFile.$error;
+                  delete picFile.$errorParam;
+                }
+              });
+            }
           }
         }
       };

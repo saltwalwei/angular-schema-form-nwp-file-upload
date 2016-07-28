@@ -1,4 +1,4 @@
-<ng-form class="file-upload mb-lg" ng-schema-file ng-model="$$value$$" name="uploadForm">
+<ng-form sf-array="form" class="file-upload mb-lg" ng-schema-file ng-file-count-validator ng-model="$$value$$" name="uploadForm">
   <label ng-show="form.title && form.notitle !== true" class="control-label" for="fileInputButton" ng-class="{'sr-only': !showTitle(), 'text-danger': uploadForm.$error.required && !uploadForm.$pristine}">
     {{ form.title }}<i ng-show="form.required">&nbsp;*</i>
   </label>
@@ -65,8 +65,8 @@
   <div ng-messages="uploadForm.$error" ng-messages-multiple="">
     <div class="text-danger errorMsg" ng-message="maxSize">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong>. ({{ form.schema[picFile.$error].validationMessage2 | translate }} <strong>{{picFile.size / 1000000|number:1}}MB</strong>)</div>
     <div class="text-danger errorMsg" ng-message="pattern">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
-    <div class="text-danger errorMsg" ng-message="maxItems">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
-    <div class="text-danger errorMsg" ng-message="minItems">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
+    <div class="text-danger errorMsg" ng-message="maxItems">{{ form.schema[picFile.$error + "ValidationMessage"] | translate }} <strong>{{picFile.$errorParam}}</strong></div>
+    <div class="text-danger errorMsg" ng-message="minItems">{{ form.schema[picFile.$error + "ValidationMessage"] | translate }} <strong>{{picFile.$errorParam}}</strong></div>
     <div class="text-danger errorMsg" ng-show="errorMsg">{{errorMsg}}</div>
   </div>
 </script>
