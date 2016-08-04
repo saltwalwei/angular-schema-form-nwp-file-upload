@@ -1,111 +1,120 @@
-<ng-form class="file-upload mb-lg" ng-schema-file ng-model="$$value$$" name="uploadForm">
-   <label ng-show="form.title && form.notitle !== true" class="control-label" for="fileInputButton" ng-class="{'sr-only': !showTitle(), 'text-danger': uploadForm.$error.required && !uploadForm.$pristine}">
-      {{ form.title }}<i ng-show="form.required">&nbsp;*</i>
-   </label>
+<ng-form sf-array="form" class="file-upload mb-lg" ng-schema-file ng-file-count-validator ng-model="$$value$$" name="uploadForm">
+  <label ng-show="form.title && form.notitle !== true" class="control-label" for="fileInputButton" ng-class="{'sr-only': !showTitle(), 'text-danger': uploadForm.$error.required && !uploadForm.$pristine}">
+    {{ form.title }}<i ng-show="form.required">&nbsp;*</i>
+  </label>
 
-   <div ng-show="picFile">
-      <div ng-include="'uploadProcess.html'" class="mb"></div>
-   </div>
+  <div ng-repeat="file in $$value$$">
+    <div class="thumbnail-container">
+      <label><a href="api/files/download/{{file.filename}}/{{schema.id}}/{{file.path}}" download="{{file.originalname}}">{{file.originalname}}</a></label>
+      <!-- api call to get file preview from server -->
+      <img ng-src="/api/files/preview/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
+      <button class="btn btn-danger btn-xs" ng-click="deleteFile(file)">x</button>
+    </div>
+  </div>
+  <div class="clearfix"></div>
 
-   <ul ng-show="picFiles && picFiles.length" class="list-group">
-      <li class="list-group-item" ng-repeat="picFile in picFiles">
-         <div ng-include="'uploadProcess.html'"></div>
-      </li>
-   </ul>
+  <div ng-show="picFile">
+    <div ng-include="'uploadProcess.html'" class="mb"></div>
+  </div>
 
-   <div class="well well-sm bg-white mb" ng-class="{'has-error border-danger': (uploadForm.$error.required && !uploadForm.$pristine) || (hasError() && errorMessage(schemaError()))}">
-      <small class="text-muted" ng-show="form.description" ng-bind-html="form.description"></small>
-      <div ng-if="isSinglefileUpload" ng-include="'singleFileUpload.html'"></div>
-      <div ng-if="!isSinglefileUpload" ng-include="'multiFileUpload.html'"></div>
-      <div class="help-block mb0" ng-show="uploadForm.$error.required && !uploadForm.$pristine">{{ 'modules.attribute.fields.required.caption' | translate }}</div>
-      <div class="help-block mb0" ng-show="(hasError() && errorMessage(schemaError()))" ng-bind-html="(hasError() && errorMessage(schemaError()))"></div>
-   </div>
+  <ul ng-show="picFiles && picFiles.length" class="list-group process-files">
+    <li class="list-group-item process-file" ng-repeat="picFile in picFiles">
+      <div ng-include="'uploadProcess.html'"></div>
+    </li>
+  </ul>
+
+  <div class="well well-sm bg-white mb" ng-class="{'has-error border-danger': (uploadForm.$error.required && !uploadForm.$pristine) || (hasError() && errorMessage(schemaError()))}">
+    <small class="text-muted" ng-show="form.description" ng-bind-html="form.description"></small>
+    <div ng-if="isSinglefileUpload" ng-include="'singleFileUpload.html'"></div>
+    <div ng-if="!isSinglefileUpload" ng-include="'multiFileUpload.html'"></div>
+    <div class="help-block mb0" ng-show="uploadForm.$error.required && !uploadForm.$pristine">{{ 'modules.attribute.fields.required.caption' | translate }}</div>
+    <div class="help-block mb0" ng-show="(hasError() && errorMessage(schemaError()))" ng-bind-html="(hasError() && errorMessage(schemaError()))"></div>
+  </div>
 </ng-form>
 
 <script type='text/ng-template' id="uploadProcess.html">
-   <div class="row mb">
-      <div class="col-sm-4 mb-sm">
-         <label title="{{ 'modules.upload.field.preview' | translate }}" class="text-info">{{
-            'modules.upload.field.preview' | translate }}</label>
-         <img ngf-src="picFile" class="img-thumbnail img-responsive">
-         <div class="img-placeholder"
-              ng-class="{'show': picFile.$invalid && !picFile.blobUrl, 'hide': !picFile || picFile.blobUrl}">No preview
-            available
-         </div>
+  <div class="row mb">
+    <div class="col-sm-4 mb-sm">
+      <label title="{{ 'modules.upload.field.preview' | translate }}" class="text-info">{{
+        'modules.upload.field.preview' | translate }}</label>
+      <img ngf-src="picFile" class="img-thumbnail img-responsive">
+      <div class="img-placeholder"
+          ng-class="{'show': picFile.$invalid && !picFile.blobUrl, 'hide': !picFile || picFile.blobUrl}">Keine Vorschau verfügbar
       </div>
-      <div class="col-sm-4 mb-sm">
-         <label title="{{ 'modules.upload.field.filename' | translate }}" class="text-info">{{
-            'modules.upload.field.filename' | translate }}</label>
-         <div class="filename" title="{{ picFile.name }}">{{ picFile.name }}</div>
+    </div>
+    <div class="col-sm-4 mb-sm">
+      <label title="{{ 'modules.upload.field.filename' | translate }}" class="text-info">{{
+        'modules.upload.field.filename' | translate }}</label>
+      <div class="filename" title="{{ picFile.name }}">{{ picFile.name }}</div>
+    </div>
+    <div class="col-sm-4 mb-sm">
+      <label title="{{ 'modules.upload.field.progress' | translate }}" class="text-info">{{
+        'modules.upload.field.progress' | translate }}</label>
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped" role="progressbar"
+            ng-class="{'progress-bar-success': picFile.progress == 100}"
+            ng-style="{width: picFile.progress + '%'}">
+          {{ picFile.progress }} %
+        </div>
       </div>
-      <div class="col-sm-4 mb-sm">
-         <label title="{{ 'modules.upload.field.progress' | translate }}" class="text-info">{{
-            'modules.upload.field.progress' | translate }}</label>
-         <div class="progress">
-            <div class="progress-bar progress-bar-striped" role="progressbar"
-                 ng-class="{'progress-bar-success': picFile.progress == 100}"
-                 ng-style="{width: picFile.progress + '%'}">
-               {{ picFile.progress }} %
-            </div>
-         </div>
-         <button class="btn btn-primary btn-sm" type="button" ng-click="uploadFile(picFile)"
-                 ng-disabled="!picFile || picFile.$error">{{ "buttons.upload" | translate }}
-         </button>
-      </div>
-   </div>
-   <div ng-messages="uploadForm.$error" ng-messages-multiple="">
-      <div class="text-danger errorMsg" ng-message="maxSize">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong>. ({{ form.schema[picFile.$error].validationMessage2 | translate }} <strong>{{picFile.size / 1000000|number:1}}MB</strong>)</div>
-      <div class="text-danger errorMsg" ng-message="pattern">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
-      <div class="text-danger errorMsg" ng-message="maxItems">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
-      <div class="text-danger errorMsg" ng-message="minItems">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
-      <div class="text-danger errorMsg" ng-show="errorMsg">{{errorMsg}}</div>
-   </div>
+      <button class="btn btn-primary btn-sm" type="button" ng-click="uploadFile(picFile, schema.id)"
+              ng-disabled="!picFile || picFile.$error">{{ "buttons.upload" | translate }}
+      </button>
+    </div>
+  </div>
+  <div ng-messages="uploadForm.$error" ng-messages-multiple="">
+    <div class="text-danger errorMsg" ng-message="maxSize">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong>. ({{ form.schema[picFile.$error].validationMessage2 | translate }} <strong>{{picFile.size / 1000000|number:1}}MB</strong>)</div>
+    <div class="text-danger errorMsg" ng-message="pattern">{{ form.schema[picFile.$error].validationMessage | translate }} <strong>{{picFile.$errorParam}}</strong></div>
+    <div class="text-danger errorMsg" ng-message="maxItems">{{ form.schema[picFile.$error + "ValidationMessage"] | translate }} <strong>{{picFile.$errorParam}}</strong></div>
+    <div class="text-danger errorMsg" ng-message="minItems">{{ form.schema[picFile.$error + "ValidationMessage"] | translate }} <strong>{{picFile.$errorParam}}</strong></div>
+    <div class="text-danger errorMsg" ng-show="errorMsg">{{errorMsg}}</div>
+  </div>
 </script>
 
 <script type='text/ng-template' id="singleFileUpload.html">
-   <div ngf-drop="selectFile(picFile)" ngf-select="selectFile(picFile)" type="file" ngf-multiple="false"
-        ng-model="picFile" name="file"
-        ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
-        ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
-        ng-required="form.required"
-        accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
-        ng-model-options="form.ngModelOptions" ngf-drag-over-class="dragover" class="drop-box dragAndDropDescription">
-      <p class="text-center">{{ 'modules.upload.descriptionSinglefile' | translate }}</p>
-   </div>
-   <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
+  <div ngf-drop="selectFile(picFile)" ngf-select="selectFile(picFile)" type="file" ngf-multiple="false"
+      ng-model="picFile" name="file"
+      ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
+      ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
+      ng-required="form.required"
+      accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
+      ng-model-options="form.ngModelOptions" ngf-drag-over-class="dragover" class="drop-box dragAndDropDescription">
+    <p class="text-center">{{ 'modules.upload.descriptionSinglefile' | translate }}</p>
+  </div>
+  <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
 
-   <button ngf-select="selectFile(picFile)" type="file" ngf-multiple="false" ng-model="picFile" name="file"
-           ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
-           ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
-           ng-required="form.required"
-           accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
-           ng-model-options="form.ngModelOptions" id="fileInputButton"
-           class="btn btn-primary btn-block {{form.htmlClass}} mt-lg mb">
+  <button ngf-select="selectFile(picFile)" type="file" ngf-multiple="false" ng-model="picFile" name="file"
+    ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
+    ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
+    ng-required="form.required"
+    accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
+    ng-model-options="form.ngModelOptions" id="fileInputButton"
+    class="btn btn-primary btn-block {{form.htmlClass}} mt-lg mb">
       <fa fw="fw" name="upload" class="mr-sm"></fa>
       {{ "buttons.add" | translate }}
-   </button>
+  </button>
 </script>
 
 <script type='text/ng-template' id="multiFileUpload.html">
-   <div ngf-drop="selectFiles(picFiles)" ngf-select="selectFiles(picFiles)" type="file" ngf-multiple="true"
-        ng-model="picFiles" name="files"
-        ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
-        ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
-        ng-required="form.required"
-        accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
-        ng-model-options="form.ngModelOptions" ngf-drag-over-class="dragover" class="drop-box dragAndDropDescription">
-      <p class="text-center">{{ 'modules.upload.descriptionMultifile' | translate }}</p>
-   </div>
-   <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
+  <div ngf-drop="selectFiles(picFiles)" ngf-select="selectFiles(picFiles)" type="file" ngf-multiple="true"
+    ng-model="picFiles" name="files"
+    ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
+    ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
+    ng-required="form.required"
+    accept="*"
+    ng-model-options="form.ngModelOptions" ngf-drag-over-class="dragover" class="drop-box dragAndDropDescription">
+    <p class="text-center">{{ 'modules.upload.descriptionMultifile' | translate }}</p>
+  </div>
+  <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
 
-   <button ngf-select="selectFiles(picFiles)" type="file" ngf-multiple="true" multiple ng-model="picFiles" name="files"
-           accept="{{form.schema.pattern && form.schema.pattern.mimeType}}"
-           ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
-           ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
-           ng-required="form.required"
-           ng-model-options="form.ngModelOptions" id="fileInputButton"
-           class="btn btn-primary btn-block {{form.htmlClass}} mt-lg mb">
-      <fa fw="fw" name="upload" class="mr-sm"></fa>
-      {{ "buttons.add" | translate }}
-   </button>
+  <button ngf-select="selectFiles(picFiles)" type="file" ngf-multiple="true" multiple ng-model="picFiles" name="files"
+    accept="*"
+    ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
+    ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
+    ng-required="form.required"
+    ng-model-options="form.ngModelOptions" id="fileInputButton"
+    class="btn btn-primary btn-block {{form.htmlClass}} mt-lg mb">
+     <fa fw="fw" name="upload" class="mr-sm"></fa>
+     {{ "buttons.add" | translate }}
+  </button>
 </script>
