@@ -1,4 +1,4 @@
-<ng-form sf-array="form" class="file-upload mb-lg" ng-schema-file ng-file-count-validator ng-model="$$value$$" name="uploadForm">
+<ng-form sf-array="form" class="{{form.htmlClass}} file-upload mb-lg" ng-schema-file ng-file-count-validator ng-model="$$value$$" name="uploadForm">
   <label ng-show="form.title && form.notitle !== true" class="control-label" for="fileInputButton" ng-class="{'sr-only': !showTitle(), 'text-danger': uploadForm.$error.required && !uploadForm.$pristine}">
     {{ form.title }}<i ng-show="form.required">&nbsp;*</i>
   </label>
@@ -113,7 +113,7 @@
     ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
     ng-required="form.required"
     ng-model-options="form.ngModelOptions" id="fileInputButton"
-    class="btn btn-primary btn-block {{form.htmlClass}} mt-lg mb">
+    class="btn btn-primary btn-block mt-lg mb">
      <fa fw="fw" name="upload" class="mr-sm"></fa>
      {{ "buttons.add" | translate }}
   </button>
