@@ -8,7 +8,7 @@
       <label><a href="api/files/download/{{file.filename}}/{{schema.id}}/{{file.path}}" download="{{file.originalname}}">{{file.originalname}}</a></label>
       <!-- api call to get file preview from server -->
       <img ng-src="/api/files/preview/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
-      <button class="btn btn-danger btn-xs" ng-click="deleteFile(file)">x</button>
+      <button type="button" class="btn btn-danger btn-xs" ng-click="deleteFile(file)">x</button>
     </div>
   </div>
   <div class="clearfix"></div>
@@ -83,7 +83,7 @@
   </div>
   <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
 
-  <button ngf-select="selectFile(picFile)" type="file" ngf-multiple="false" ng-model="picFile" name="file"
+  <button ngf-select="selectFile(picFile)" type="button" ngf-multiple="false" ng-model="picFile" name="file"
     ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
     ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
     ng-required="form.required"
@@ -107,7 +107,7 @@
   </div>
   <div ngf-no-file-drop>{{ 'modules.upload.dndNotSupported' | translate}}</div>
 
-  <button ngf-select="selectFiles(picFiles)" type="file" ngf-multiple="true" multiple ng-model="picFiles" name="files"
+  <button ngf-select="selectFiles(picFiles)" type="button" ngf-multiple="true" multiple ng-model="picFiles" name="files"
     accept="*"
     ng-attr-ngf-pattern="{{form.schema.pattern && form.schema.pattern.mimeType ? form.schema.pattern.mimeType : undefined }}"
     ng-attr-ngf-max-size="{{form.schema.maxSize && form.schema.maxSize.maximum ? form.schema.maxSize.maximum : undefined }}"
