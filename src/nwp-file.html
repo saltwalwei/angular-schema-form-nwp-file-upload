@@ -5,9 +5,9 @@
 
   <div ng-repeat="file in $$value$$">
     <div class="thumbnail-container">
-      <label><a href="api/files/download/{{file.filename}}/{{schema.id}}/{{file.path}}" download="{{file.originalname}}">{{file.originalname}}</a></label>
+      <label><a href="{{url}}/download/{{file.filename}}/{{schema.id}}/{{file.path}}" download="{{file.originalname}}">{{file.originalname}}</a></label>
       <!-- api call to get file preview from server -->
-      <img ng-src="/api/files/preview/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
+      <img ng-src="{{url}}/preview/{{file.filename}}/{{schema.id}}/{{file.path}}" class="file-thumbnail">
       <button type="button" class="btn btn-danger btn-xs" ng-click="deleteFile(file)">x</button>
     </div>
   </div>

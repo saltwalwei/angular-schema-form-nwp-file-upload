@@ -104,7 +104,7 @@ angular
         scope:    true,
         require:  'ngModel',
         link:     function (scope, element, attrs, ngModel) {
-          scope.url = ConfigService.getUploadUrl();
+          scope.url = ConfigService.getFileUrl();
           var token = CookieService.getToken();
           scope.isSinglefileUpload = scope.form && scope.form.schema && scope.form.schema.format === 'singlefile';
 
