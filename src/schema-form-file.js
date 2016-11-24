@@ -98,13 +98,13 @@ angular
       'ngFileUpload',
       'ngMessages'
    ])
-   .directive('ngSchemaFile', ['Upload', 'CookieService', '$timeout', '$q', function (Upload, CookieService, $timeout, $q) {
+   .directive('ngSchemaFile', ['Upload', 'CookieService', 'ConfigService', '$timeout', '$q', function (Upload, CookieService, ConfigService, $timeout, $q) {
       return {
         restrict: 'A',
         scope:    true,
         require:  'ngModel',
         link:     function (scope, element, attrs, ngModel) {
-          scope.url = scope.form && scope.form.endpoint;
+          scope.url = ConfigService.getUploadUrl();
           var token = CookieService.getToken();
           scope.isSinglefileUpload = scope.form && scope.form.schema && scope.form.schema.format === 'singlefile';
 
