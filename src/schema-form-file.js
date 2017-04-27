@@ -98,7 +98,7 @@ angular
       'ngFileUpload',
       'ngMessages'
    ])
-   .directive('ngSchemaFile', ['Upload', 'CookieService', 'ConfigService', '$timeout', '$q', function (Upload, CookieService, ConfigService, $timeout, $q) {
+   .directive('ngSchemaFile', ['Upload', 'CookieService', 'ConfigService', '$timeout', '$q', '$rootScope', function (Upload, CookieService, ConfigService, $timeout, $q, $rootScope) {
       return {
         restrict: 'A',
         scope:    true,
@@ -107,6 +107,18 @@ angular
           scope.url = ConfigService.getFileUrl();
           var token = CookieService.getToken();
           scope.isSinglefileUpload = scope.form && scope.form.schema && scope.form.schema.format === 'singlefile';
+
+          // set files to null when gertrude updates the model
+          var unregisterModelUpdate = $rootScope.$on('modelUpdated', function () {
+            scope.picFile = null;
+            scope.picFiles = null;
+          });
+
+          scope.$on('$destroy', function () {
+            unregisterModelUpdate();
+          });
+
+
 
           scope.selectFile  = function (file) {
             scope.picFile = file;
